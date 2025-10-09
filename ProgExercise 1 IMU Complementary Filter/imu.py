@@ -82,17 +82,69 @@ class IMUGui:
 					self.complResPlot.createGUI(-1, -1)
 
 	def processAccel(self, timestamp, accel):
-		"""Fill with your code"""
-		return (0, 0, 0)
+		ax, ay, az = accel
+
+		# Calculate roll (alpha) and pitch (beta) using atan2.
+		# Roll (alpha) is rotation around the x-axis
+		alpha_rad = math.atan2(ay, az)
+
+		# Pitch (beta) is rotation around the y-axis
+		beta_rad = math.atan2(-ax, math.sqrt(ay**2 + az**2))
+
+		# Convert radians to degrees
+		alpha = math.degrees(alpha_rad)
+		beta = math.degrees(beta_rad)
+
+		return (alpha, beta, 0)
 
 	def processGyro(self, timestamp, gyro):
-		"""Fill with your code"""
-		return (0, 0, 0)
+		""" Calculate roll (alpha) and pitch (beta) by integrating the gyro rates."""
+		p, q, r = gyro
+
+		dt = 0
+		if self.lastTimestamp != -1:
+			dt = timestamp - self.lastTimestamp
+
+		# Integrate angular velocities to get the angle (Euler integration).
+		self.alphaGInt += p * dt
+		self.betaGInt += q * dt
+
+		# Convert the integrated angles from radians to degrees
+		alpha_deg = math.degrees(self.alphaGInt)
+		beta_deg = math.degrees(self.betaGInt)
+
+		return (alpha_deg, beta_deg, 0)
 
 	def processCompl(self, timestamp, accel, gyro):
-		"""Fill with your code"""
-		return (0, 0, 0)
+		"""Fuse accelerometer and gyro data using a complementary filter."""
+		ax, ay, az = accel
+		p, q, r = gyro
 
+		dt = 0
+		if self.lastTimestamp != -1:
+			dt = timestamp - self.lastTimestamp
+
+		# Calculate angle from accelerometer (long-term, noisy estimate)
+		alpha_accel = math.atan2(ay, az)
+		beta_accel = math.atan2(-ax, math.sqrt(ay**2 + az**2))
+
+		# Integrate gyro data (short-term, drifting estimate)
+		# This is the "prediction" step based on the previous filtered angle.
+		alpha_gyro_pred = self.alphaCInt + p * dt
+		beta_gyro_pred = self.betaCInt + q * dt
+
+		# Complementary filter to combine both estimates
+		# A small K trusts the gyro more for short-term changes.
+		K = self.complK
+		self.alphaCInt = (1 - K) * alpha_gyro_pred + K * alpha_accel
+		self.betaCInt = (1 - K) * beta_gyro_pred + K * beta_accel
+
+		# Update timestamp for the next iteration's dt calculation.
+		self.lastTimestamp = timestamp
+
+		# Return the fused angles in radians. The main loop will convert them to degrees.
+		return (self.alphaCInt, self.betaCInt, 0)
+	
 	def run(self):
 		dpg.create_context()
 		dpg.create_viewport()
