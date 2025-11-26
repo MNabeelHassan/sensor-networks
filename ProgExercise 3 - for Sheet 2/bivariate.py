@@ -7,13 +7,28 @@ import scipy.stats as stats
 # FILL THIS FUNCTION
 def mean(values):
     mu = 0
-    # YOUR CODE HERE
+    sum_of_values = 0
+    no_of_values = len(values)
+    for value in values:
+        sum_of_values += value
+    mu = sum_of_values / no_of_values
     return mu
-    
+
 # FILL THIS FUNCTION
 def variance(values):
     sigma2 = 0
-    # YOUR CODE HERE
+    len_minus_one = len(values) - 1
+    mu = mean(values)
+    deviation = []
+    squared_deviation = []
+    for value in values:
+        deviation.append(value - mu)
+    for dev in deviation:
+        squared_deviation.append(dev ** 2)
+    sum_of_squared_deviation = 0
+    for sq_dev in squared_deviation:
+        sum_of_squared_deviation += sq_dev
+    sigma2 = sum_of_squared_deviation / len_minus_one
     return sigma2
     
 # FILL THIS FUNCTION
