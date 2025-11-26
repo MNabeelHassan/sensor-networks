@@ -35,24 +35,40 @@ def variance(values):
 def covariance(values1, values2):
     assert(len(values1) == len(values2))
     cov = 0
-    # YOUR CODE HERE
+    deviation1 = []
+    deviation2 = []
+    mu1 = mean(values1)
+    mu2 = mean(values2)
+    for value in values1:
+        deviation1.append(value - mu1)
+    for value in values2:
+        deviation2.append(value - mu2)
+    prod_deviation = []
+    for i in range(len(deviation1)):
+        prod_deviation.append(deviation1[i] * deviation2[i])
+    sum_of_prod_deviation = sum(prod_deviation)
+    cov = sum_of_prod_deviation / (len(values1) - 1)
     return cov
     
 # FILL THIS FUNCTION
 def correlation_coefficient(values1, values2):
     assert(len(values1) == len(values2))
     corr = 0
+    cov = covariance(values1, values2)
+    sigma1 = sqrt(variance(values1))
+    sigma2 = sqrt(variance(values2))
+    corr = cov / (sigma1 * sigma2)
     return corr
 
 # Create some data
-values1 = []
-values2 = []
-for i in range(10):
-    values1.append(randint(-5, 20))
+values1 = [6, 14, 5, 11, 14, 10, 12, 10, 12, 6]
+values2 = [12, 17, 22, 18, 15, 28,24,27, 30, 11]
+# for i in range(10):
+#     values1.append(randint(-5, 20))
 # This is creating simple correlated data
 # If you want uncorrelated, comment this out and uncomment the next block
-for v in values1:
-    values2.append(v+randint(-1,20))
+# for v in values1:
+#     values2.append(v+randint(-1,20))
 #for i in range(10):
 #    values2.append(randint(-1,20))
 
